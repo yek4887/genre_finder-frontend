@@ -42,7 +42,7 @@ function App() {
 
     try {
       // 이제 실제 백엔드 API를 호출!
-      const response = await axios.post('http://localhost:8080/api/recommend-genres', { query });
+      const response = await axios.post('https://genre-finder-backend.onrender.com', { query });
       setSearchedArtist(response.data.searchedArtist);
       setAiRecommendations(response.data.aiRecommendations);
     } catch (err) {
