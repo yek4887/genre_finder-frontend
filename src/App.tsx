@@ -26,43 +26,28 @@ function App() {
   const [error, setError] = useState('');
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
-  // ▼▼▼ 페이지 로드 시 토큰 확인 로직 ▼▼▼
   useEffect(() => {
-    const hash = window.location.hash
-      .substring(1)
-      .split('&')
-      .reduce((initial, item) => {
-        if (item) {
-          var parts = item.split('=');
-          initial[parts[0]] = decodeURIComponent(parts[1]);
-        }
-        return initial;
-      }, {} as any);
-    
-    // URL에서 토큰 정보를 가져오거나 로컬 스토리지에서 가져옴
+    // ▼▼▼ 이 부분이 수정되었습니다 (불필요한 'hash' 변수 삭제) ▼▼▼
     const tokenFromUrl = new URLSearchParams(window.location.search).get('access_token');
     const tokenFromStorage = localStorage.getItem('spotify_access_token');
 
     if (tokenFromUrl) {
         localStorage.setItem('spotify_access_token', tokenFromUrl);
         setAccessToken(tokenFromUrl);
-        // URL에서 토큰을 제거하여 주소를 깔끔하게 만듭니다.
         window.history.pushState({}, document.title, "/"); 
     } else if (tokenFromStorage) {
         setAccessToken(tokenFromStorage);
     }
+    // ▲▲▲ 이 부분이 수정되었습니다 ▲▲▲
   }, []);
-  // ▲▲▲ 페이지 로드 시 토큰 확인 로직 ▲▲▲
 
   const handleLogin = () => {
-    // 백엔드의 로그인 API로 리디렉션
     window.location.href = 'https://genre-finder-backend.onrender.com/api/login';
   };
 
   const handleLogout = () => {
     setAccessToken(null);
     localStorage.removeItem('spotify_access_token');
-    // 페이지를 새로고침하여 초기 상태로 돌아갑니다.
     window.location.reload();
   };
 
@@ -85,7 +70,7 @@ function App() {
     try {
       const response = await axios.post('https://genre-finder-backend.onrender.com/api/recommend-genres', { 
         query,
-        accessToken // 요청 시 accessToken 포함
+        accessToken
       });
       setSearchedArtist(response.data.searchedArtist);
       setRecommendations(response.data.aiRecommendations);
@@ -96,7 +81,6 @@ function App() {
     }
   };
 
-  // ▼▼▼ 플레이리스트 저장 핸들러 추가 ▼▼▼
   const handleSavePlaylist = async () => {
     if (!accessToken || !recommendations.length || !searchedArtist) {
       alert('먼저 아티스트를 검색해주세요.');
@@ -116,18 +100,15 @@ function App() {
         alert('플레이리스트 생성에 실패했습니다.');
     }
   };
-  // ▲▲▲ 플레이리스트 저장 핸들러 추가 ▲▲▲
 
   return (
     <div className="App">
       <header className="App-header">
-        {/* ▼▼▼ 로그인 상태에 따른 UI 변경 ▼▼▼ */}
         {accessToken ? (
           <button onClick={handleLogout} className="logout-button">Logout</button>
         ) : (
           <button onClick={handleLogin} className="login-button">Login with Spotify</button>
         )}
-        {/* ▲▲▲ 로그인 상태에 따른 UI 변경 ▲▲▲ */}
 
         <h1>Genre Finder</h1>
         <p>AI가 당신의 취향에 맞는 새로운 음악 장르를 찾아드립니다.</p>
@@ -159,13 +140,11 @@ function App() {
         )}
         
         {recommendations.length > 0 && (
-          // ▼▼▼ 플레이리스트 저장 버튼 추가 ▼▼▼
           <div className="playlist-save-container">
             <button onClick={handleSavePlaylist} className="save-playlist-button">
               추천곡을 내 플레이리스트로 저장하기
             </button>
           </div>
-          // ▲▲▲ 플레이리스트 저장 버튼 추가 ▲▲▲
         )}
 
         <div className="recommendations">
