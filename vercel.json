@@ -1,4 +1,3 @@
-// vercel.json 파일
 {
   "headers": [
     {
@@ -6,10 +5,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          // script-src에 'unsafe-eval'과 'unsafe-inline'을 추가합니다.
-          // 'self'는 현재 도메인을 의미합니다.
-          // 기존에 설정된 다른 항목(예: connect-src의 Vercel URL)이 있다면 함께 유지해야 합니다.
-          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; frame-src 'none';"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://vitals.vercel-insights.com; img-src 'self' data:; frame-src 'none';"
         }
       ]
     }
