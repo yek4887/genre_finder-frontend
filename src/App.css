@@ -1,68 +1,75 @@
 /* frontend/src/App.css */
 .App {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  display: flex; /* Flexbox 레이아웃 시작 */
+  flex-direction: column; /* 자식 요소들을 세로로 정렬 */
+  min-height: 100vh; /* 최소 높이를 화면 전체 높이로 설정 */
   text-align: center;
   background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  background-size: cover; /* 이미지가 화면을 꽉 채우도록 설정 */
+  background-position: center; /* 이미지를 중앙에 위치 */
+  background-attachment: fixed; /* 스크롤해도 배경은 고정 */
   color: white;
+  font-family: sans-serif; /* 기본 폰트 설정 */
 }
 
 .App-header {
-  position: relative;
+  position: relative; /* 자식 요소(버튼)의 위치 기준점이 됨 */
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; /* 모든 자식 요소를 가운데로 정렬 */
   justify-content: center;
-  padding: 2rem;
+  padding: 4rem 2rem 2rem 2rem; /* 헤더 여백 조정 (위쪽 여백 늘림) */
 }
 
 .login-button, .logout-button {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
-  background-color: #1DB954;
+  position: absolute; /* 헤더를 기준으로 위치를 자유롭게 설정 */
+  top: 2rem; /* 위에서 2rem 만큼 */
+  right: 2rem; /* 오른쪽에서 2rem 만큼 */
+  
+  background-color: #1DB954; /* Spotify 녹색 */
   color: white;
   border: none;
   padding: 0.8rem 1.5rem;
-  border-radius: 50px;
+  border-radius: 50px; /* 동그란 버튼 모양 */
   font-weight: bold;
   font-size: 1rem;
   cursor: pointer;
   transition: transform 0.2s, background-color 0.2s;
+  z-index: 10; /* 다른 요소 위에 표시되도록 */
 }
 
 .login-button:hover, .logout-button:hover {
   background-color: #1ed760;
-  transform: scale(1.05);
+  transform: scale(1.05); /* 마우스를 올리면 살짝 커지는 효과 */
 }
 
 form {
   display: flex;
   width: 100%;
-  max-width: 600px;
+  max-width: 600px; /* 검색창의 최대 너비 */
   margin-top: 2rem;
 }
 
 form input[type="text"] {
-  flex-grow: 1;
-  padding: 1rem;
-  font-size: 1.2rem;
+  flex-grow: 1; /* 남는 공간을 모두 차지하도록 설정 */
+  padding: 1rem; /* 내부 여백을 늘려 크게 만듦 */
+  font-size: 1.2rem; /* 글자 크기를 키움 */
   border: 2px solid #555;
-  border-radius: 8px 0 0 8px;
+  border-radius: 8px 0 0 8px; /* 왼쪽 모서리만 둥글게 */
   background-color: #333;
   color: white;
+  outline: none; /* 포커스 시 외곽선 제거 */
+}
+form input[type="text"]:focus {
+  border-color: #1DB954; /* 포커스 시 테두리 색상 변경 */
 }
 
 form button {
   padding: 1rem 1.5rem;
   font-size: 1.2rem;
   border: 2px solid #1DB954;
-  border-left: none;
-  border-radius: 0 8px 8px 0;
+  border-left: none; /* 입력창과의 경계선 제거 */
+  border-radius: 0 8px 8px 0; /* 오른쪽 모서리만 둥글게 */
   background-color: #1DB954;
   color: white;
   cursor: pointer;
@@ -74,37 +81,55 @@ form button:hover {
 }
 
 .error {
-  color: #ff4d4d;
-  margin-top: 1rem;
+  color: #ff4d4d; /* 밝은 빨간색 */
+  margin-top: 1.5rem;
+  font-weight: bold;
+  background-color: rgba(255, 77, 77, 0.1); /* 배경색 살짝 추가 */
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  display: inline-block; /* 내용물 크기만큼만 배경 적용 */
 }
 
 main {
   flex-grow: 1; /* 남는 공간을 모두 차지해서 footer를 아래로 밀어냄 */
+  padding: 2rem 0; /* 메인 콘텐츠 상하 여백 */
 }
+
+/* 로더 스타일 (App.tsx의 Loader 컴포넌트와 연동) */
+/* Tailwind 클래스를 사용하므로 별도 CSS 불필요하나, 커스텀 필요 시 여기에 추가 */
+/* .loader { ... } */
+/* border-spotify-green 클래스를 위한 커스텀 Tailwind 설정이 필요할 수 있음 */
+/* tailwind.config.js 에 extend: { colors: { 'spotify-green': '#1DB954' } } 추가 */
 
 .search-result-container {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: flex-start; /* 상단 정렬 */
   gap: 4rem;
-  margin-top: 3rem;
-  padding: 0 2rem;
-  flex-wrap: wrap;
+  margin: 3rem auto 0 auto; /* 헤더와의 간격 및 중앙 정렬 */
+  padding: 0 2rem; /* 좌우 여백 */
+  flex-wrap: wrap; /* 작은 화면에서 줄바꿈 */
+  max-width: 900px; /* 검색 결과 최대 너비 */
 }
 
 .searched-artist {
-  max-width: 300px;
+  max-width: 300px; /* 아티스트 이미지 최대 너비 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .searched-artist img {
   width: 100%;
-  border-radius: 50%;
+  max-width: 250px; /* 이미지 크기 조정 */
+  border-radius: 50%; /* 이미지를 동그랗게 */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .searched-artist h2 {
-  font-size: 2rem;
+  font-size: 2.2rem;
+  font-weight: bold;
 }
 
 .top-tracks {
@@ -117,6 +142,7 @@ main {
   margin-bottom: 1rem;
   border-bottom: 2px solid #1DB954;
   padding-bottom: 0.5rem;
+  color: #eee;
 }
 
 .top-tracks ol {
@@ -142,7 +168,7 @@ main {
 }
 
 .playlist-save-container {
-  margin: 3rem 0;
+  margin: 4rem 0; /* 위아래 여백 늘림 */
 }
 
 .save-playlist-button {
@@ -173,18 +199,18 @@ main {
 
 .recommendations {
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 1200px; /* 콘텐츠 최대 너비 설정 */
+  margin: 0 auto; /* 중앙 정렬 */
   padding: 0 2rem;
 }
 
 .genre-card {
-  display: flex;
-  gap: 2rem;
-  background-color: rgba(255, 255, 255, 0.05);
+  display: flex; /* Flexbox를 사용하여 3단 레이아웃 생성 */
+  gap: 2rem; /* 각 단(column) 사이의 간격 */
+  background-color: rgba(255, 255, 255, 0.05); /* 카드 배경색 약간 추가 */
   border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2rem;
+  padding: 2.5rem; /* 내부 여백 늘림 */
+  margin-bottom: 2.5rem; /* 카드 간 간격 늘림 */
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -199,15 +225,17 @@ main {
   flex-direction: column;
 }
 
+/* 좌측: 장르명 & 이미지 */
 .genre-identity {
-  flex: 1;
+  flex: 1; /* 비율 1 */
   align-items: center;
 }
 
 .genre-identity h3 {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem; /* 이미지와의 간격 */
   font-size: 1.8rem;
-  color: #1DB954;
+  color: #1DB954; /* 스포티파이 녹색 */
+  font-weight: bold;
 }
 
 .genre-image {
@@ -215,25 +243,43 @@ main {
   max-width: 180px;
   border-radius: 8px;
   object-fit: cover;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
+.genre-image-placeholder {
+  width: 180px;
+  height: 180px;
+  border-radius: 8px;
+  background-color: #333;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: italic;
+}
+
+/* 가운데: 설명 */
 .genre-description {
-  flex: 2;
+  flex: 2; /* 비율 2 (더 넓게) */
   justify-content: center;
   text-align: left;
   line-height: 1.7;
   font-size: 1.1rem;
   color: #ddd;
+  border-left: 1px solid #444; /* 구분선 추가 */
+  border-right: 1px solid #444; /* 구분선 추가 */
+  padding: 0 2rem; /* 좌우 여백 */
 }
 
+/* 우측: 아티스트 목록 */
 .genre-artists {
-  flex: 1;
+  flex: 1; /* 비율 1 */
   text-align: left;
 }
 
 .genre-artists h4 {
   font-size: 1.2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem; /* 목록과의 간격 */
   color: #ccc;
   border-bottom: 1px solid #555;
   padding-bottom: 0.5rem;
@@ -246,29 +292,8 @@ main {
 }
 
 .genre-artists li {
-  margin-bottom: 0.7rem;
-  font-size: 1.1rem;
+  margin-bottom: 0.8rem; /* 아티스트 간 간격 */
 }
-
-@media (max-width: 768px) {
-  .genre-card {
-    flex-direction: column;
-    align-items: center;
-  }
-  .genre-description, .genre-artists {
-    text-align: center;
-    align-items: center;
-  }
-}
-
-.App-footer {
-  padding: 2rem 1rem;
-  font-size: 0.8rem;
-  color: #aaa;
-  margin-top: auto;
-  line-height: 1.5;
-}
-/* App.css 파일 맨 아래에 추가 */
 
 .artist-link-button {
   background: none;
@@ -287,4 +312,30 @@ main {
 .artist-link-button:hover {
   color: #1DB954; /* 마우스를 올리면 Spotify 녹색으로 변경 */
   text-decoration: underline;
+}
+
+/* 모바일 화면에서는 세로로 쌓이도록 설정 */
+@media (max-width: 768px) {
+  .genre-card {
+    flex-direction: column;
+    align-items: center;
+  }
+  .genre-description, .genre-artists {
+    text-align: center;
+    align-items: center;
+    border-left: none; /* 모바일에서는 구분선 제거 */
+    border-right: none;
+    padding: 1rem 0; /* 상하 여백 조정 */
+  }
+  .search-result-container {
+    gap: 2rem;
+  }
+}
+
+.App-footer {
+  padding: 2rem 1rem;
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-top: auto; /* main 영역이 남는 공간을 차지하게 함 */
+  line-height: 1.5; /* 줄 간격 */
 }
