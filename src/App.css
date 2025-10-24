@@ -1,9 +1,8 @@
-/* App.css 파일 */
-/* App.css 파일에서 .App 부분을 찾아서 교체하세요. */
+/* frontend/src/App.css */
 .App {
-  display: flex; /* Flexbox 레이아웃 시작 */
-  flex-direction: column; /* 자식 요소들을 세로로 정렬 */
-  min-height: 100vh; /* 최소 높이를 화면 전체 높이로 설정 */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   text-align: center;
   background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop');
   background-size: cover;
@@ -11,28 +10,25 @@
   background-attachment: fixed;
   color: white;
 }
-/* ▲▲▲ 이 코드로 교체하세요 ▲▲▲ */
-/* App.css 파일에서 .App-header 부분을 찾아서 수정하세요. */
+
 .App-header {
-  position: relative; /* 자식 요소(버튼)의 위치 기준점이 됨 */
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem; /* 헤더에 충분한 여백 추가 */
+  padding: 2rem;
 }
 
-/* App.css 파일에서 .login-button 부분을 찾아 교체하세요. */
 .login-button, .logout-button {
-  position: absolute; /* 헤더를 기준으로 위치를 자유롭게 설정 */
-  top: 2rem; /* 위에서 2rem 만큼 */
-  right: 2rem; /* 오른쪽에서 2rem 만큼 */
-  
-  background-color: #1DB954; /* Spotify 녹색 */
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  background-color: #1DB954;
   color: white;
   border: none;
   padding: 0.8rem 1.5rem;
-  border-radius: 50px; /* 동그란 버튼 모양 */
+  border-radius: 50px;
   font-weight: bold;
   font-size: 1rem;
   cursor: pointer;
@@ -41,23 +37,22 @@
 
 .login-button:hover, .logout-button:hover {
   background-color: #1ed760;
-  transform: scale(1.05); /* 마우스를 올리면 살짝 커지는 효과 */
+  transform: scale(1.05);
 }
-/* ▲▲▲ 이 부분을 추가하세요 ▲▲▲ */
-/* 검색 폼 스타일링 */
+
 form {
   display: flex;
   width: 100%;
-  max-width: 600px; /* 검색창의 최대 너비 */
+  max-width: 600px;
   margin-top: 2rem;
 }
 
 form input[type="text"] {
-  flex-grow: 1; /* 남는 공간을 모두 차지하도록 설정 */
-  padding: 1rem; /* 내부 여백을 늘려 크게 만듦 */
-  font-size: 1.2rem; /* 글자 크기를 키움 */
+  flex-grow: 1;
+  padding: 1rem;
+  font-size: 1.2rem;
   border: 2px solid #555;
-  border-radius: 8px 0 0 8px; /* 왼쪽 모서리만 둥글게 */
+  border-radius: 8px 0 0 8px;
   background-color: #333;
   color: white;
 }
@@ -66,8 +61,8 @@ form button {
   padding: 1rem 1.5rem;
   font-size: 1.2rem;
   border: 2px solid #1DB954;
-  border-left: none; /* 입력창과의 경계선 제거 */
-  border-radius: 0 8px 8px 0; /* 오른쪽 모서리만 둥글게 */
+  border-left: none;
+  border-radius: 0 8px 8px 0;
   background-color: #1DB954;
   color: white;
   cursor: pointer;
@@ -77,38 +72,33 @@ form button {
 form button:hover {
   background-color: #1ed760;
 }
-/* App.css 파일 맨 아래에 추가 */
 
-/* App.css 파일에서 .App-footer 부분을 찾아서 교체하세요. */
-
-.App-footer {
-  padding: 2rem 1rem;
-  font-size: 0.8rem;
-  color: #aaa;
-  margin-top: auto;
-  line-height: 1.5; /* 줄 간격을 약간 넓혀 가독성을 높입니다. */
+.error {
+  color: #ff4d4d;
+  margin-top: 1rem;
 }
-/* App.css 파일 맨 아래에 추가 */
 
-/* App.css 파일 맨 아래에 추가 */
+main {
+  flex-grow: 1; /* 남는 공간을 모두 차지해서 footer를 아래로 밀어냄 */
+}
 
 .search-result-container {
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* 상단 정렬 */
+  align-items: flex-start;
   gap: 4rem;
-  margin-top: 3rem; /* 헤더와의 간격 추가 */
-  padding: 0 2rem; /* 좌우 여백 */
+  margin-top: 3rem;
+  padding: 0 2rem;
   flex-wrap: wrap;
 }
 
 .searched-artist {
-  max-width: 300px; /* 아티스트 이미지 최대 너비 */
+  max-width: 300px;
 }
 
 .searched-artist img {
   width: 100%;
-  border-radius: 50%; /* 이미지를 동그랗게 */
+  border-radius: 50%;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   margin-bottom: 1rem;
 }
@@ -150,18 +140,16 @@ form button:hover {
   color: #1DB954;
   text-decoration: underline;
 }
-/* App.css 파일 맨 아래 save-playlist-button 관련 코드를 교체 */
 
 .playlist-save-container {
   margin: 3rem 0;
 }
 
 .save-playlist-button {
-  display: inline-flex; /* 아이콘과 텍스트를 나란히 정렬 */
-  align-items: center; /* 세로 중앙 정렬 */
-  gap: 0.8rem; /* 아이콘과 텍스트 사이 간격 */
-
-  background-color: #1DB954; /* Spotify 녹색 */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  background-color: #1DB954;
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -181,4 +169,102 @@ form button:hover {
 .spotify-icon {
   width: 24px;
   height: 24px;
+}
+
+.recommendations {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.genre-card {
+  display: flex;
+  gap: 2rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.genre-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.genre-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.genre-identity {
+  flex: 1;
+  align-items: center;
+}
+
+.genre-identity h3 {
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  color: #1DB954;
+}
+
+.genre-image {
+  width: 100%;
+  max-width: 180px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.genre-description {
+  flex: 2;
+  justify-content: center;
+  text-align: left;
+  line-height: 1.7;
+  font-size: 1.1rem;
+  color: #ddd;
+}
+
+.genre-artists {
+  flex: 1;
+  text-align: left;
+}
+
+.genre-artists h4 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #ccc;
+  border-bottom: 1px solid #555;
+  padding-bottom: 0.5rem;
+}
+
+.genre-artists ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.genre-artists li {
+  margin-bottom: 0.7rem;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .genre-card {
+    flex-direction: column;
+    align-items: center;
+  }
+  .genre-description, .genre-artists {
+    text-align: center;
+    align-items: center;
+  }
+}
+
+.App-footer {
+  padding: 2rem 1rem;
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-top: auto;
+  line-height: 1.5;
 }
