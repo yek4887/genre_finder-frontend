@@ -163,9 +163,14 @@ function App() {
           ))}
         </div>
       </main>
-      <footer className="App-footer">
-      <p>Powered by Spotify. All music data and images are properties of Spotify AB.</p>
-    </footer>
+      // frontend/src/App.tsx 파일에서 return (...) 안의 footer 부분을 교체하세요.
+
+<footer className="App-footer">
+  {/* ▼▼▼ 이 부분을 교체하세요 ▼▼▼ */}
+  <p>© {new Date().getFullYear()} Genre Finder. All Rights Reserved.</p>
+  <p>Powered by Spotify. All music data and images are properties of Spotify AB.</p>
+  {/* ▲▲▲ 이 부분을 교체하세요 ▲▲▲ */}
+</footer>
     </div>
   );
 }
