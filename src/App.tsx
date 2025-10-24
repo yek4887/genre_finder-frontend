@@ -30,71 +30,21 @@ function App() {
 
   // --- 로그아웃 함수 ---
   const handleLogout = useCallback(() => {
-    console.log("handleLogout called."); // 로그 추가
+    console.log("handleLogout called. Clearing all token states and storage.");
     setAccessToken(null); setRefreshToken(null); setTokenExpiryTime(null);
     localStorage.removeItem('spotify_access_token');
     localStorage.removeItem('spotify_refresh_token');
     localStorage.removeItem('spotify_token_expiry');
-    // window.location.reload(); // 새로고침 대신 상태 초기화로 처리 시도
-    window.location.href = '/'; // 확실한 초기화를 위해 홈으로 리디렉션
+    window.location.href = '/'; // 홈으로 리디렉션
   }, []);
-
-  // --- 토큰 관리 ---
-  useEffect(() => {
-    console.log("useEffect for token check running..."); // 로그 추가
-    const params = new URLSearchParams(window.location.search);
-    const tokenFromUrl = params.get('access_token');
-    const refreshFromUrl = params.get('refresh_token');
-    const expiresInFromUrl = params.get('expires_in');
-
-    const tokenFromStorage = localStorage.getItem('spotify_access_token');
-    const refreshFromStorage = localStorage.getItem('spotify_refresh_token');
-    const expiryFromStorage = localStorage.getItem('spotify_token_expiry');
-
-    if (tokenFromUrl && refreshFromUrl && expiresInFromUrl) {
-      // 안전 마진(60초) 포함하여 만료 시간 계산
-      const expiryTimestamp = Date.now() + (parseInt(expiresInFromUrl, 10) - 60) * 1000;
-      console.log(`Token from URL. Expires In: ${expiresInFromUrl}s, Calculated Expiry: ${new Date(expiryTimestamp)}`); // 로그 추가
-      localStorage.setItem('spotify_access_token', tokenFromUrl);
-      localStorage.setItem('spotify_refresh_token', refreshFromUrl);
-      localStorage.setItem('spotify_token_expiry', expiryTimestamp.toString());
-      setAccessToken(tokenFromUrl);
-      setRefreshToken(refreshFromUrl);
-      setTokenExpiryTime(expiryTimestamp);
-      window.history.pushState({}, document.title, window.location.pathname);
-    } else if (tokenFromStorage && refreshFromStorage && expiryFromStorage) {
-      const expiryTimestamp = parseInt(expiryFromStorage, 10);
-      if (!isNaN(expiryTimestamp)) {
-        // 만료 시간 지났는지 여기서도 한번 체크
-        if (Date.now() < expiryTimestamp) {
-          setAccessToken(tokenFromStorage);
-          setRefreshToken(refreshFromStorage);
-          setTokenExpiryTime(expiryTimestamp);
-          console.log("Token loaded from storage. Expires at:", new Date(expiryTimestamp)); // 로그 추가
-        } else {
-            console.log("Token from storage is expired. Attempting refresh on next API call or manual refresh.");
-            // 만료된 토큰은 상태에 설정하지 않거나, refresh 시도 (여기서는 설정하고 다음 요청 시 갱신)
-             setAccessToken(tokenFromStorage); // 일단 설정은 하되, 만료된 상태
-             setRefreshToken(refreshFromStorage);
-             setTokenExpiryTime(expiryTimestamp);
-             // 또는 즉시 갱신 시도 (선택 사항)
-             // refreshAccessToken();
-        }
-      } else {
-        console.error("Invalid expiry time found in storage. Clearing tokens.");
-        handleLogout();
-      }
-    } else {
-         console.log("No token found in URL or storage."); // 로그 추가
-    }
-  }, [handleLogout]); // handleLogout 의존성 유지
 
   // --- 토큰 갱신 함수 ---
   const refreshAccessToken = useCallback(async (): Promise<string | null> => {
     if (isRefreshingToken) {
-        console.warn("Refresh already in progress.");
-        // 간단히 null 반환하여 동시 요청 방지
-        return null; // 또는 Promise를 반환하여 대기하도록 구현 가능
+      console.warn("Refresh already in progress. Waiting briefly...");
+      // 이미 갱신 중일 때 약간의 대기 후 현재 토큰 반환 (갱신 성공 시 업데이트될 것임)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      return accessToken; // 현재 accessToken 상태 반환
     }
     if (!refreshToken) {
       console.error("No refresh token available. Logging out.");
@@ -104,18 +54,19 @@ function App() {
 
     console.log("Attempting to refresh access token using refresh token:", refreshToken.substring(0,5)+"...");
     setIsRefreshingToken(true);
+    let newAccessToken: string | null = null; // 결과 저장 변수
     try {
       const response = await axios.post(`${API_BASE_URL}/api/refresh_token`, { refreshToken });
-      const { accessToken: newAccessToken, expiresIn } = response.data;
-      if (newAccessToken && expiresIn) {
-        const newExpiryTimestamp = Date.now() + (expiresIn - 60) * 1000; // 안전 마진 포함
-        localStorage.setItem('spotify_access_token', newAccessToken);
+      const { accessToken: receivedToken, expiresIn } = response.data;
+      if (receivedToken && expiresIn) {
+        const newExpiryTimestamp = Date.now() + (expiresIn - 60) * 1000;
+        localStorage.setItem('spotify_access_token', receivedToken);
         localStorage.setItem('spotify_token_expiry', newExpiryTimestamp.toString());
-        // Refresh Token은 그대로 유지되므로 저장 안 함
-        setAccessToken(newAccessToken); // 상태 업데이트
+        // Refresh Token은 그대로 유지
+        setAccessToken(receivedToken); // 상태 업데이트
         setTokenExpiryTime(newExpiryTimestamp); // 상태 업데이트
+        newAccessToken = receivedToken; // 반환할 값 설정
         console.log("Access token refreshed successfully. New expiry:", new Date(newExpiryTimestamp));
-        return newAccessToken; // 새 토큰 반환
       } else {
         console.error("Invalid response from refresh token endpoint:", response.data);
         throw new Error("Invalid response structure from refresh token endpoint");
@@ -124,37 +75,105 @@ function App() {
       console.error("Failed to refresh access token:", err.response?.data || err.message || err);
       // 갱신 실패 시 로그아웃
       handleLogout();
-      return null; // 실패 시 null 반환
     } finally {
         setIsRefreshingToken(false);
+        console.log("Token refresh process finished."); // 종료 로그
     }
-  }, [refreshToken, handleLogout, isRefreshingToken]); // accessToken 제거됨
+    return newAccessToken; // 성공 시 새 토큰, 실패 시 null 반환
+  }, [refreshToken, handleLogout, isRefreshingToken, accessToken]); // accessToken 추가 (갱신 중 반환 위해)
+
+
+  // --- 토큰 관리 (useEffect 수정) ---
+  useEffect(() => {
+    console.log("useEffect: Checking for tokens...");
+    const params = new URLSearchParams(window.location.search);
+    const tokenFromUrl = params.get('access_token');
+    const refreshFromUrl = params.get('refresh_token');
+    const expiresInFromUrl = params.get('expires_in');
+
+    const tokenFromStorage = localStorage.getItem('spotify_access_token');
+    const refreshFromStorage = localStorage.getItem('spotify_refresh_token');
+    const expiryFromStorage = localStorage.getItem('spotify_token_expiry');
+
+    let loadedToken: string | null = null;
+    let loadedRefresh: string | null = null;
+    let loadedExpiry: number | null = null;
+
+    if (tokenFromUrl && refreshFromUrl && expiresInFromUrl) {
+      // URL에서 가져온 경우
+      const expiryTimestamp = Date.now() + (parseInt(expiresInFromUrl, 10) - 60) * 1000;
+      console.log(`useEffect: Token found in URL. Expires In: ${expiresInFromUrl}s, Calculated Expiry: ${new Date(expiryTimestamp)}`);
+      localStorage.setItem('spotify_access_token', tokenFromUrl);
+      localStorage.setItem('spotify_refresh_token', refreshFromUrl);
+      localStorage.setItem('spotify_token_expiry', expiryTimestamp.toString());
+      loadedToken = tokenFromUrl;
+      loadedRefresh = refreshFromUrl;
+      loadedExpiry = expiryTimestamp;
+      window.history.pushState({}, document.title, window.location.pathname);
+    } else if (tokenFromStorage && refreshFromStorage && expiryFromStorage) {
+      // 로컬 스토리지에서 가져온 경우
+      const expiryTimestamp = parseInt(expiryFromStorage, 10);
+      if (!isNaN(expiryTimestamp)) {
+        loadedToken = tokenFromStorage;
+        loadedRefresh = refreshFromStorage;
+        loadedExpiry = expiryTimestamp;
+        console.log(`useEffect: Token loaded from storage. Expires at: ${new Date(expiryTimestamp)}`);
+      } else {
+        console.error("useEffect: Invalid expiry time found in storage. Clearing tokens.");
+        handleLogout(); // 잘못된 값 있으면 로그아웃
+      }
+    } else {
+         console.log("useEffect: No token found in URL or storage.");
+    }
+
+    // 상태 업데이트 전에 만료 시간 확인
+    if (loadedToken && loadedExpiry && Date.now() < loadedExpiry) {
+      // 유효한 토큰이면 상태 업데이트
+      console.log("useEffect: Setting valid token state.");
+      setAccessToken(loadedToken);
+      setRefreshToken(loadedRefresh);
+      setTokenExpiryTime(loadedExpiry);
+    } else if (loadedToken && loadedExpiry && Date.now() >= loadedExpiry) {
+      // 로드했지만 이미 만료된 경우 -> 즉시 갱신 시도
+      console.warn("useEffect: Token from storage is expired. Attempting immediate refresh.");
+       setRefreshToken(loadedRefresh); // Refresh Token은 먼저 설정해야 함
+       // async 함수를 직접 호출할 수 없으므로 IIFE 사용
+       (async () => {
+           await refreshAccessToken();
+       })();
+    } else if (!loadedToken) {
+        console.log("useEffect: No valid token loaded, user needs to login.");
+        // 토큰이 아예 없는 경우 (로그아웃 상태 유지)
+    }
+
+  }, [handleLogout, refreshAccessToken]); // refreshAccessToken 의존성 추가
+
 
   // --- API 요청 래퍼 함수 ---
-  const makeApiRequest = useCallback(async (endpoint: string, data: any) => {
-    let currentToken = accessToken; // 요청 시점의 토큰 사용
+  const makeApiRequest = useCallback(async (endpoint: string, data: any): Promise<any> => {
+    let currentToken = accessToken; // 현재 상태의 토큰으로 시작
 
-    console.log(`[makeApiRequest] Requesting ${endpoint}. Token expiry: ${tokenExpiryTime ? new Date(tokenExpiryTime) : 'N/A'}`);
+    console.log(`[makeApiRequest] Requesting ${endpoint}. Current token expiry: ${tokenExpiryTime ? new Date(tokenExpiryTime) : 'N/A'}`);
 
-    // 만료 시간 확인 (Date.now()와 비교)
-    if (tokenExpiryTime && Date.now() >= tokenExpiryTime) {
-      console.warn("[makeApiRequest] Token expired based on time. Refreshing...");
-      currentToken = await refreshAccessToken(); // 갱신 시도
+    // 만료 시간 확인 (Date.now()와 비교) - 만료되었거나 null이면 갱신 시도
+    if (!tokenExpiryTime || Date.now() >= tokenExpiryTime) {
+      console.warn(`[makeApiRequest] Token expired or invalid (${tokenExpiryTime ? new Date(tokenExpiryTime) : 'N/A'}). Refreshing...`);
+      currentToken = await refreshAccessToken();
       if (!currentToken) {
           console.error("[makeApiRequest] Token refresh failed. Aborting request.");
-          throw new Error("Failed to refresh token. Please log in again."); // 오류 발생시켜 중단
+          // 사용자에게 알릴 수 있는 에러 throw
+          throw new Error("Failed to refresh authentication. Please log in again.");
       }
       console.log("[makeApiRequest] Token refreshed before request.");
     } else if (!currentToken) {
-        console.error("[makeApiRequest] No access token available.");
+        console.error("[makeApiRequest] No access token available, though expiry time might be valid?");
          throw new Error("No access token available. Please log in.");
     }
 
-    // 요청 데이터에 현재 유효한 토큰 포함
+    // 요청 데이터에 현재 유효한(또는 갱신된) 토큰 포함
     const requestData = { ...data, accessToken: currentToken };
 
     try {
-      // 실제 API 요청
       console.log(`[makeApiRequest] Sending POST to ${endpoint} with token prefix: ${currentToken?.substring(0,5)}`);
       const response = await axios.post(`${API_BASE_URL}${endpoint}`, requestData);
       console.log(`[makeApiRequest] Request to ${endpoint} successful.`);
@@ -163,32 +182,32 @@ function App() {
       console.error(`[makeApiRequest] Initial request to ${endpoint} failed:`, err);
       // 401 오류(토큰 만료) 감지 시 재시도
       if (axios.isAxiosError(err) && err.response?.status === 401) {
-        console.warn("[makeApiRequest] Received 401 Unauthorized. Attempting force refresh...");
+        console.warn("[makeApiRequest] Received 401 Unauthorized during API request. Attempting force refresh...");
         currentToken = await refreshAccessToken(); // 강제 갱신
         if (currentToken) {
           console.log("[makeApiRequest] Force refresh successful. Retrying request...");
           requestData.accessToken = currentToken; // 갱신된 토큰으로 업데이트
           try {
-             // 재시도 (단 한번)
              const retryResponse = await axios.post(`${API_BASE_URL}${endpoint}`, requestData);
              console.log(`[makeApiRequest] Retry request to ${endpoint} successful.`);
              return retryResponse.data;
-          } catch(retryErr) {
-             console.error("[makeApiRequest] Retry request failed after refresh:", retryErr);
-              // 재시도 실패 시 최종 오류 전파 (호출한 쪽에서 처리)
-             throw retryErr;
+          } catch(retryErr: any) {
+             console.error("[makeApiRequest] Retry request failed after refresh:", retryErr.response?.data || retryErr.message || retryErr);
+             // 재시도 실패 시 로그아웃 또는 명확한 에러 메시지
+             handleLogout(); // 재시도 실패 시 로그아웃
+             throw new Error("Failed to complete request even after token refresh. Please log in again.");
           }
         } else {
-           // 강제 갱신 실패 시
-           console.error("[makeApiRequest] Force refresh failed.");
+           console.error("[makeApiRequest] Force refresh failed after 401.");
+           // handleLogout은 refreshAccessToken 내부에서 호출됨
            throw new Error("Token refresh failed after 401. Please log in again.");
         }
       } else {
-        // 401 외 다른 오류
+        // 401 외 다른 Axios 오류 또는 일반 오류
         throw err; // 원래 오류 전파
       }
     }
-  }, [accessToken, tokenExpiryTime, refreshAccessToken, handleLogout]); // 의존성 배열 점검
+  }, [accessToken, tokenExpiryTime, refreshAccessToken, handleLogout]);
 
 
   // --- 검색 실행 함수 ---
@@ -200,8 +219,9 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     try {
+      // makeApiRequest를 호출하여 검색 실행
       const data = await makeApiRequest('/api/recommend-genres', { query: searchQuery });
-      console.log("[runSearch] Search API call successful. Data:", data);
+      console.log("[runSearch] Search API call successful.");
       setSearchedArtist(data.searchedArtist || null);
       setRecommendations(data.aiRecommendations || []);
       setTopTracks(data.topTracks || []);
@@ -239,6 +259,7 @@ function App() {
     console.log("[handleSavePlaylist] Saving playlist for:", searchedArtist.name);
 
     try {
+      // makeApiRequest를 호출하여 플레이리스트 저장
       const data = await makeApiRequest('/api/save-playlist', {
         trackIds,
         artistName: searchedArtist.name
@@ -260,7 +281,11 @@ function App() {
     <div className="App">
        {/* ... (헤더, 메인, 푸터 JSX 구조는 이전과 거의 동일) ... */}
        <header className="App-header">
-         {/* ... 로그인/로그아웃 버튼 ... */}
+         {accessToken ? (
+           <button onClick={handleLogout} className="logout-button">Logout</button>
+         ) : (
+           <button onClick={handleLogin} className="login-button">Login with Spotify</button>
+         )}
          <h1>Genre Finder</h1>
          <p>...</p>
          {accessToken && ( <form onSubmit={handleFormSubmit}> {/* ... 검색 폼 ... */} </form> )}
