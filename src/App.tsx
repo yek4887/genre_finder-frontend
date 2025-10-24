@@ -161,6 +161,9 @@ function App() {
           ))}
         </div>
       </main>
+      <footer className="App-footer">
+      <p>Powered by Spotify. All music data and images are properties of Spotify AB.</p>
+    </footer>
     </div>
   );
 }

@@ -51,3 +51,11 @@ form button {
 form button:hover {
   background-color: #1ed760;
 }
+/* App.css 파일 맨 아래에 추가 */
+
+.App-footer {
+  padding: 2rem 1rem;
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-top: auto; /* main 콘텐츠 아래에 자연스럽게 위치하도록 설정 */
+}
