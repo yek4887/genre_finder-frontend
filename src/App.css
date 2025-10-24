@@ -1,21 +1,47 @@
 /* App.css 파일 */
-/* ▼▼▼ 이 코드로 교체하세요 ▼▼▼ */
+/* App.css 파일에서 .App 부분을 찾아서 교체하세요. */
 .App {
+  display: flex; /* Flexbox 레이아웃 시작 */
+  flex-direction: column; /* 자식 요소들을 세로로 정렬 */
+  min-height: 100vh; /* 최소 높이를 화면 전체 높이로 설정 */
   text-align: center;
   background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop');
-  background-size: cover; /* 이미지가 화면을 꽉 채우도록 설정 */
-  background-position: center; /* 이미지를 중앙에 위치 */
-  background-attachment: fixed; /* 스크롤해도 배경은 고정 */
-  min-height: 100vh; /* 최소 높이를 화면 전체 높이로 설정 */
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: white;
 }
 /* ▲▲▲ 이 코드로 교체하세요 ▲▲▲ */
-/* ▼▼▼ 이 부분을 추가하세요 ▼▼▼ */
+/* App.css 파일에서 .App-header 부분을 찾아서 수정하세요. */
 .App-header {
+  position: relative; /* 자식 요소(버튼)의 위치 기준점이 됨 */
   display: flex;
   flex-direction: column;
-  align-items: center; /* 모든 자식 요소를 가운데로 정렬 */
+  align-items: center;
   justify-content: center;
+  padding: 2rem; /* 헤더에 충분한 여백 추가 */
+}
+
+/* App.css 파일에서 .login-button 부분을 찾아 교체하세요. */
+.login-button, .logout-button {
+  position: absolute; /* 헤더를 기준으로 위치를 자유롭게 설정 */
+  top: 2rem; /* 위에서 2rem 만큼 */
+  right: 2rem; /* 오른쪽에서 2rem 만큼 */
+  
+  background-color: #1DB954; /* Spotify 녹색 */
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 50px; /* 동그란 버튼 모양 */
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.login-button:hover, .logout-button:hover {
+  background-color: #1ed760;
+  transform: scale(1.05); /* 마우스를 올리면 살짝 커지는 효과 */
 }
 /* ▲▲▲ 이 부분을 추가하세요 ▲▲▲ */
 /* 검색 폼 스타일링 */
