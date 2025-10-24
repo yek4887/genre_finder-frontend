@@ -53,9 +53,12 @@ form button:hover {
 }
 /* App.css 파일 맨 아래에 추가 */
 
+/* App.css 파일에서 .App-footer 부분을 찾아서 교체하세요. */
+
 .App-footer {
   padding: 2rem 1rem;
   font-size: 0.8rem;
   color: #aaa;
-  margin-top: auto; /* main 콘텐츠 아래에 자연스럽게 위치하도록 설정 */
+  margin-top: auto;
+  line-height: 1.5; /* 줄 간격을 약간 넓혀 가독성을 높입니다. */
 }
