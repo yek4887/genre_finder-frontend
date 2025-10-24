@@ -115,7 +115,7 @@ function App() {
         
         {accessToken && (
           <form onSubmit={handleSearch}>
-           // frontend/src/App.tsx 파일에서 이 부분을 찾아서 수정하세요.
+           
 
           <input
             type="text"
