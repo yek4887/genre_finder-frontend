@@ -115,13 +115,15 @@ function App() {
         
         {accessToken && (
           <form onSubmit={handleSearch}>
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="좋아하는 아티스트를 입력하세요"
-              disabled={loading}
-            />
+           // frontend/src/App.tsx 파일에서 이 부분을 찾아서 수정하세요.
+
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="좋아하는 아티스트 혹은 곡명을 입력하세요"
+            disabled={loading}
+          />
             <button type="submit" disabled={loading}>
               {loading ? '찾는 중...' : '검색'}
             </button>
