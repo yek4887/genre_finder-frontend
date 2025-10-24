@@ -163,7 +163,7 @@ function App() {
           ))}
         </div>
       </main>
-      // frontend/src/App.tsx 파일에서 return (...) 안의 footer 부분을 교체하세요.
+      
 
 <footer className="App-footer">
   {/* ▼▼▼ 이 부분을 교체하세요 ▼▼▼ */}
