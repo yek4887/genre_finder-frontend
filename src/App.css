@@ -88,3 +88,49 @@ form button:hover {
   margin-top: auto;
   line-height: 1.5; /* 줄 간격을 약간 넓혀 가독성을 높입니다. */
 }
+/* App.css 파일 맨 아래에 추가 */
+
+.search-result-container {
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.searched-artist {
+  /* 기존 스타일 유지 */
+}
+
+.top-tracks {
+  text-align: left;
+  max-width: 400px;
+}
+
+.top-tracks h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #1DB954;
+  padding-bottom: 0.5rem;
+}
+
+.top-tracks ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+}
+
+.top-tracks li {
+  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+}
+
+.top-tracks a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.top-tracks a:hover {
+  color: #1DB954;
+  text-decoration: underline;
+}
