@@ -268,3 +268,23 @@ main {
   margin-top: auto;
   line-height: 1.5;
 }
+/* App.css 파일 맨 아래에 추가 */
+
+.artist-link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #fff; /* 기본 텍스트 색상 */
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 1.1rem; /* 부모 li와 폰트 크기 맞춤 */
+  font-family: inherit; /* 전체 폰트 상속 */
+  text-align: left;
+  transition: color 0.2s;
+}
+
+.artist-link-button:hover {
+  color: #1DB954; /* 마우스를 올리면 Spotify 녹색으로 변경 */
+  text-decoration: underline;
+}

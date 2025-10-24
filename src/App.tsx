@@ -55,10 +55,11 @@ function App() {
     window.location.reload();
   };
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) {
-      setError('아티스트 이름을 입력해주세요.');
+  // ▼▼▼ 핵심 로직이 분리되었습니다 ▼▼▼
+  // --- 검색을 실행하는 핵심 로직 ---
+  const runSearch = async (searchQuery: string) => {
+    if (!searchQuery.trim()) {
+      setError('아티스트/곡명을 입력해주세요.');
       return;
     }
     if (!accessToken) {
@@ -71,21 +72,35 @@ function App() {
     setSearchedArtist(null);
     setRecommendations([]);
     setTopTracks([]);
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // 검색 시 화면 상단으로 이동
 
     try {
       const response = await axios.post('https://genre-finder-backend.onrender.com/api/recommend-genres', {
-        query,
+        query: searchQuery,
         accessToken
       });
       setSearchedArtist(response.data.searchedArtist);
       setRecommendations(response.data.aiRecommendations || []);
       setTopTracks(response.data.topTracks || []);
     } catch (err: any) {
-      setError(err.response?.data?.error || '추천 정보를 가져오는 데 실패했습니다. 아티스트 이름을 확인해주세요.');
+      setError(err.response?.data?.error || '추천 정보를 가져오는 데 실패했습니다.');
     } finally {
       setLoading(false);
     }
   };
+
+  // --- 폼 제출 시 호출되는 핸들러 ---
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    runSearch(query);
+  };
+
+  // --- 추천 아티스트 클릭 시 호출되는 핸들러 ---
+  const handleArtistClick = (artistName: string) => {
+    setQuery(artistName); // 검색창 텍스트를 클릭된 아티스트로 변경
+    runSearch(artistName); // 해당 아티스트로 즉시 검색 실행
+  };
+  // ▲▲▲ 핵심 로직이 분리되었습니다 ▲▲▲
 
   const handleSavePlaylist = async () => {
     if (!accessToken || !recommendations.length || !searchedArtist) {
@@ -120,7 +135,8 @@ function App() {
         <p>AI가 당신의 취향에 맞는 새로운 음악 장르를 찾아드립니다.</p>
 
         {accessToken && (
-          <form onSubmit={handleSearch}>
+          // ▼▼▼ onSubmit 핸들러가 수정되었습니다 ▼▼▼
+          <form onSubmit={handleFormSubmit}>
             <input
               type="text"
               value={query}
@@ -183,14 +199,20 @@ function App() {
               <div className="genre-column genre-description">
                 <p>{genre.description}</p>
               </div>
+              {/* ▼▼▼ 이 부분이 수정되었습니다 ▼▼▼ */}
               <div className="genre-column genre-artists">
                 <h4>Representative Artists</h4>
                 <ul>
                   {genre.artists.map((artist) => (
-                    <li key={artist.spotifyTrackId}>{artist.artistName}</li>
+                    <li key={artist.spotifyTrackId}>
+                      <button onClick={() => handleArtistClick(artist.artistName)} className="artist-link-button">
+                        {artist.artistName}
+                      </button>
+                    </li>
                   ))}
                 </ul>
               </div>
+              {/* ▲▲▲ 이 부분이 수정되었습니다 ▲▲▲ */}
             </div>
           ))}
         </div>
