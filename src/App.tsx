@@ -17,12 +17,10 @@ interface GenreRecommendation {
   description: string;
   artists: RecommendedArtist[];
 }
-// ▼▼▼ 이 부분을 추가하세요 ▼▼▼
 interface Track {
   name: string;
   url: string;
 }
-// ▲▲▲ 이 부분을 추가하세요 ▲▲▲
 
 function App() {
   const [query, setQuery] = useState('');
@@ -34,18 +32,16 @@ function App() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
-    // ▼▼▼ 이 부분이 수정되었습니다 (불필요한 'hash' 변수 삭제) ▼▼▼
     const tokenFromUrl = new URLSearchParams(window.location.search).get('access_token');
     const tokenFromStorage = localStorage.getItem('spotify_access_token');
 
     if (tokenFromUrl) {
         localStorage.setItem('spotify_access_token', tokenFromUrl);
         setAccessToken(tokenFromUrl);
-        window.history.pushState({}, document.title, "/"); 
+        window.history.pushState({}, document.title, "/");
     } else if (tokenFromStorage) {
         setAccessToken(tokenFromStorage);
     }
-    // ▲▲▲ 이 부분이 수정되었습니다 ▲▲▲
   }, []);
 
   const handleLogin = () => {
@@ -76,12 +72,15 @@ function App() {
     setTopTracks([]);
 
     try {
-      const response = await axios.post('https://genre-finder-backend.onrender.com/api/recommend-genres', { 
+      const response = await axios.post('https://genre-finder-backend.onrender.com/api/recommend-genres', {
         query,
         accessToken
       });
+      // ▼▼▼ 이 부분이 수정되었습니다 ▼▼▼
       setSearchedArtist(response.data.searchedArtist);
       setRecommendations(response.data.aiRecommendations);
+      setTopTracks(response.data.topTracks); // <-- 누락되었던 코드 추가!
+      // ▲▲▲ 이 부분이 수정되었습니다 ▲▲▲
     } catch (err: any) {
       setError(err.response?.data?.error || '추천 정보를 가져오는 데 실패했습니다. 아티스트 이름을 확인해주세요.');
     } finally {
@@ -120,18 +119,16 @@ function App() {
 
         <h1>Genre Finder</h1>
         <p>AI가 당신의 취향에 맞는 새로운 음악 장르를 찾아드립니다.</p>
-        
+
         {accessToken && (
           <form onSubmit={handleSearch}>
-           
-
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="좋아하는 아티스트 혹은 곡명을 입력하세요"
-            disabled={loading}
-          />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="좋아하는 아티스트 혹은 곡명을 입력하세요"
+              disabled={loading}
+            />
             <button type="submit" disabled={loading}>
               {loading ? '찾는 중...' : '검색'}
             </button>
@@ -143,25 +140,29 @@ function App() {
 
       <main>
         {searchedArtist && (
-          <div className="searched-artist">
-            <img src={searchedArtist.imageUrl} alt={searchedArtist.name} />
-            <h2>{searchedArtist.name}</h2>
+          <div className="search-result-container">
+            <div className="searched-artist">
+              <img src={searchedArtist.imageUrl} alt={searchedArtist.name} />
+              <h2>{searchedArtist.name}</h2>
+            </div>
+
+            {topTracks.length > 0 && (
+              <div className="top-tracks">
+                <h3>Top Tracks on Spotify</h3>
+                <ol>
+                  {topTracks.map((track) => (
+                    <li key={track.url}>
+                      <a href={track.url} target="_blank" rel="noopener noreferrer">
+                        {track.name}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
           </div>
         )}
-        {/* ▼▼▼ 대표곡 목록을 표시하는 부분을 추가하세요 ▼▼▼ */}
-        <div className="top-tracks">
-              <h3>Top Tracks on Spotify</h3>
-              <ol>
-                {topTracks.map((track) => (
-                  <li key={track.url}>
-                    <a href={track.url} target="_blank" rel="noopener noreferrer">
-                      {track.name}
-                    </a>
-                  </li>
-                ))}
-              </ol>
-            </div>
-            {/* ▲▲▲ 대표곡 목록을 표시하는 부분을 추가하세요 ▲▲▲ */}
+
         {recommendations.length > 0 && (
           <div className="playlist-save-container">
             <button onClick={handleSavePlaylist} className="save-playlist-button">
@@ -184,14 +185,11 @@ function App() {
           ))}
         </div>
       </main>
-      
 
-<footer className="App-footer">
-  {/* ▼▼▼ 이 부분을 교체하세요 ▼▼▼ */}
-  <p>© {new Date().getFullYear()} Genre Finder. All Rights Reserved.</p>
-  <p>Powered by Spotify. All music data and images are properties of Spotify AB.</p>
-  {/* ▲▲▲ 이 부분을 교체하세요 ▲▲▲ */}
-</footer>
+      <footer className="App-footer">
+        <p>© {new Date().getFullYear()} Genre Finder. All Rights Reserved.</p>
+        <p>Powered by Spotify. All music data and images are properties of Spotify AB.</p>
+      </footer>
     </div>
   );
 }
