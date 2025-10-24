@@ -1,6 +1,7 @@
 // frontend/src/App.tsx
-import { useState, useEffect, useCallback, useRef } from 'react'; // useRef 추가
-import axios, { AxiosError } from 'axios';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import axios /* Removed AxiosError import */ from 'axios';
+// './App.css' 파일이 frontend/src 폴더 바로 안에 있는지 다시 한번 확인해주세요.
 import './App.css'; 
 
 // --- 타입 정의 ---
@@ -26,7 +27,7 @@ function App() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [tokenExpiryTime, setTokenExpiryTime] = useState<number | null>(null);
-  const isRefreshingToken = useRef(false); // useRef로 변경하여 리렌더링 방지 및 동시성 제어
+  const isRefreshingToken = useRef(false);
 
   // --- 로그아웃 함수 ---
   const handleLogout = useCallback(() => {
@@ -38,14 +39,13 @@ function App() {
     window.location.href = '/';
   }, []);
 
-  // --- 토큰 갱신 함수 ---
-  const refreshAccessToken = useCallback(async (): Promise<string | null> => {
-    // useRef를 사용하여 동시 갱신 시도 방지
+   // --- 토큰 갱신 함수 ---
+   const refreshAccessToken = useCallback(async (): Promise<string | null> => {
     if (isRefreshingToken.current) {
-      console.warn("[refreshAccessToken] Refresh already in progress. Waiting...");
-      // 간단한 폴링 또는 Promise 기반 대기 메커니즘 추가 가능
-      await new Promise(resolve => setTimeout(resolve, 1500)); // 잠시 대기
-      return accessToken; // 현재 상태 반환 (갱신 성공 시 업데이트 되어 있을 것임)
+        console.warn("[refreshAccessToken] Refresh already in progress. Waiting...");
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        // 갱신 시도 중 반환되는 accessToken은 갱신 전의 값일 수 있으므로 주의
+        return accessToken;
     }
     if (!refreshToken) {
       console.error("[refreshAccessToken] No refresh token available. Logging out.");
@@ -53,21 +53,19 @@ function App() {
       return null;
     }
 
-    console.log("[refreshAccessToken] Attempting to refresh access token...");
-    isRefreshingToken.current = true; // 갱신 시작 플래그
+    console.log("[refreshAccessToken] Attempting to refresh access token using refresh token:", refreshToken.substring(0,5)+"...");
+    isRefreshingToken.current = true;
     let newAccessToken: string | null = null;
     try {
       const response = await axios.post(`${API_BASE_URL}/api/refresh_token`, { refreshToken });
       const { accessToken: receivedToken, expiresIn } = response.data;
       if (receivedToken && expiresIn) {
-        // 안전 마진 포함 만료 시간 계산 (현재 시간 기준)
         const newExpiryTimestamp = Date.now() + (expiresIn - 60) * 1000;
         localStorage.setItem('spotify_access_token', receivedToken);
         localStorage.setItem('spotify_token_expiry', newExpiryTimestamp.toString());
-        // 상태 업데이트
         setAccessToken(receivedToken);
         setTokenExpiryTime(newExpiryTimestamp);
-        newAccessToken = receivedToken; // 반환 값 설정
+        newAccessToken = receivedToken;
         console.log(`[refreshAccessToken] Success! New expiry: ${new Date(newExpiryTimestamp)}`);
       } else {
         console.error("[refreshAccessToken] Invalid response structure:", response.data);
@@ -75,14 +73,13 @@ function App() {
       }
     } catch (err: any) {
       console.error("[refreshAccessToken] FAILED:", err.response?.data || err.message || err);
-      // 갱신 실패 시 로그아웃
       handleLogout();
     } finally {
-        isRefreshingToken.current = false; // 갱신 종료 플래그
+        isRefreshingToken.current = false;
         console.log("[refreshAccessToken] Process finished.");
     }
-    return newAccessToken; // 성공 시 새 토큰, 실패 시 null
-  }, [refreshToken, handleLogout, accessToken]); // accessToken 추가 (갱신 중 대기 시 반환 위함)
+    return newAccessToken;
+  }, [refreshToken, handleLogout, accessToken]); // accessToken 추가됨
 
   // --- 토큰 관리 (useEffect) ---
   useEffect(() => {
@@ -101,7 +98,6 @@ function App() {
     let initialExpiry: number | null = null;
 
     if (tokenFromUrl && refreshFromUrl && expiresInFromUrl) {
-      // URL 우선 처리
       const expiryTimestamp = Date.now() + (parseInt(expiresInFromUrl, 10) - 60) * 1000;
       console.log(`useEffect: Token from URL. Expires In: ${expiresInFromUrl}s, Calculated Expiry: ${new Date(expiryTimestamp)}`);
       localStorage.setItem('spotify_access_token', tokenFromUrl);
@@ -112,7 +108,6 @@ function App() {
       initialExpiry = expiryTimestamp;
       window.history.pushState({}, document.title, window.location.pathname);
     } else if (tokenFromStorage && refreshFromStorage && expiryFromStorage) {
-      // 스토리지 처리
       const expiryTimestamp = parseInt(expiryFromStorage, 10);
       if (!isNaN(expiryTimestamp)) {
         initialToken = tokenFromStorage;
@@ -122,7 +117,7 @@ function App() {
       } else {
         console.error("useEffect: Invalid expiry time in storage. Clearing tokens.");
         handleLogout();
-        return; // 로그아웃 후 종료
+        return;
       }
     } else {
          console.log("useEffect: No token found.");
@@ -135,40 +130,39 @@ function App() {
       setRefreshToken(initialRefresh);
       setTokenExpiryTime(initialExpiry);
     } else if (initialToken && initialExpiry && Date.now() >= initialExpiry && initialRefresh) {
-      // 로드했지만 만료된 경우 -> 즉시 갱신 시도
       console.warn("useEffect: Token loaded but expired. Attempting immediate refresh.");
-      setRefreshToken(initialRefresh); // Refresh Token 먼저 설정
+       setRefreshToken(initialRefresh); // Refresh Token 먼저 설정
        (async () => {
-           await refreshAccessToken(); // await 추가
+           // await 제거하고 refreshAccessToken 호출만 -> 상태 업데이트 비동기성 고려
+           refreshAccessToken();
        })();
     } else if (!initialToken) {
         console.log("useEffect: No valid token loaded. User needs to login.");
     }
 
-  }, [handleLogout, refreshAccessToken]); // 의존성 배열에서 refreshAccessToken 제거 시도 -> 순환 의존성 가능성
+  // refreshAccessToken 의존성 제거됨
+  }, [handleLogout]);
 
 
   // --- API 요청 래퍼 함수 ---
   const makeApiRequest = useCallback(async (endpoint: string, data: any): Promise<any> => {
     // 함수 호출 시점의 상태를 명확히 하기 위해 상태 변수 다시 읽기
-    let currentToken = localStorage.getItem('spotify_access_token'); // 상태 대신 스토리지 직접 읽기 시도
-    let currentExpiry = localStorage.getItem('spotify_token_expiry');
-    let expiryTimestamp = currentExpiry ? parseInt(currentExpiry, 10) : null;
+    let currentToken = accessToken; // 상태 사용
+    let currentExpiry = tokenExpiryTime; // 상태 사용
 
-    console.log(`[makeApiRequest] Requesting ${endpoint}. Current Token from storage prefix: ${currentToken?.substring(0,5)}, Expiry: ${expiryTimestamp ? new Date(expiryTimestamp) : 'N/A'}`);
+    console.log(`[makeApiRequest] Requesting ${endpoint}. Current Token prefix: ${currentToken?.substring(0,5)}, Expiry: ${currentExpiry ? new Date(currentExpiry) : 'N/A'}`);
 
     // 만료 시간 확인 (Date.now()와 비교) - 만료되었거나 없으면 갱신 시도
-    if (!expiryTimestamp || isNaN(expiryTimestamp) || Date.now() >= expiryTimestamp) {
-      console.warn(`[makeApiRequest] Token expired or invalid based on time/storage. Refreshing...`);
-      currentToken = await refreshAccessToken(); // 갱신 시도, 결과(새 토큰 또는 null)를 currentToken에 저장
+    if (!currentExpiry || Date.now() >= currentExpiry) {
+      console.warn(`[makeApiRequest] Token expired or invalid based on time/state. Refreshing...`);
+      currentToken = await refreshAccessToken();
       if (!currentToken) {
           console.error("[makeApiRequest] Token refresh FAILED during pre-check. Aborting request.");
           throw new Error("Failed to refresh authentication. Please log in again.");
       }
       console.log("[makeApiRequest] Token refreshed before request. New token prefix:", currentToken.substring(0,5));
     } else if (!currentToken) {
-        // 이 경우는 거의 없어야 함 (expiryTimestamp가 있는데 currentToken이 null?)
-        console.error("[makeApiRequest] Inconsistent state: Expiry time exists but no access token found in storage. Logging out.");
+        console.error("[makeApiRequest] Inconsistent state: Expiry time seems valid but no access token state. Logging out.");
         handleLogout();
         throw new Error("Authentication error. Please log in again.");
     }
@@ -177,11 +171,10 @@ function App() {
     const requestData = { ...data, accessToken: currentToken };
 
     try {
-      // 실제 API 요청
       console.log(`[makeApiRequest] Sending POST to ${endpoint} with token prefix: ${currentToken?.substring(0,5)}`);
       const response = await axios.post(`${API_BASE_URL}${endpoint}`, requestData);
       console.log(`[makeApiRequest] Request to ${endpoint} successful.`);
-      return response.data; // 성공 시 데이터 반환
+      return response.data;
     } catch (err) {
       console.error(`[makeApiRequest] Initial request to ${endpoint} FAILED:`, err);
       // 401 오류(토큰 만료) 감지 시 재시도
@@ -192,7 +185,6 @@ function App() {
           console.log("[makeApiRequest] Force refresh successful. Retrying request with new token prefix:", currentToken.substring(0,5));
           requestData.accessToken = currentToken; // 갱신된 토큰으로 업데이트
           try {
-             // 재시도 (단 한번)
              const retryResponse = await axios.post(`${API_BASE_URL}${endpoint}`, requestData);
              console.log(`[makeApiRequest] Retry request to ${endpoint} successful.`);
              return retryResponse.data;
@@ -215,7 +207,7 @@ function App() {
         throw err;
       }
     }
-  }, [accessToken, tokenExpiryTime, refreshToken, refreshAccessToken, handleLogout]); // 의존성 배열 재확인
+  }, [accessToken, tokenExpiryTime, refreshToken, refreshAccessToken, handleLogout]);
 
 
   // --- 검색 실행 함수 ---
@@ -227,7 +219,6 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     try {
-      // makeApiRequest 호출 시점의 accessToken 상태는 makeApiRequest 내부에서 처리됨
       const data = await makeApiRequest('/api/recommend-genres', { query: searchQuery });
       console.log("[runSearch] Search API call successful.");
       setSearchedArtist(data.searchedArtist || null);
@@ -239,11 +230,14 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, [makeApiRequest, query]); // query 추가 (폼 제출이 아닌 클릭 등으로 호출될 경우 최신 query 반영 위해)
+  }, [makeApiRequest, query]);
 
 
   // --- Spotify 로그인 핸들러 ---
-  const handleLogin = () => { /* ... 동일 ... */ };
+  const handleLogin = () => {
+       console.log("Redirecting to login...");
+       window.location.href = `${API_BASE_URL}/api/login`;
+  };
 
 
   // --- 폼 제출 핸들러 ---
@@ -253,7 +247,13 @@ function App() {
   };
 
   // --- 아티스트 클릭 핸들러 ---
-  const handleArtistClick = (artistName?: string) => { /* ... 동일 ... */ };
+  const handleArtistClick = (artistName?: string) => {
+    if (artistName) {
+      const cleanArtistName = artistName.replace(/\s*\([^)]*\)\s*$/, '');
+      setQuery(cleanArtistName);
+      runSearch(cleanArtistName);
+    }
+  };
 
   // --- 플레이리스트 저장 핸들러 ---
   const handleSavePlaylist = useCallback(async () => {
@@ -266,7 +266,6 @@ function App() {
     console.log("[handleSavePlaylist] Saving playlist for:", searchedArtist.name);
 
     try {
-      // makeApiRequest 호출 시점의 accessToken 상태는 makeApiRequest 내부에서 처리됨
       const data = await makeApiRequest('/api/save-playlist', {
         trackIds,
         artistName: searchedArtist.name
@@ -285,7 +284,6 @@ function App() {
   // --- JSX 렌더링 ---
   return (
     <div className="App">
-       {/* ... (헤더, 메인, 푸터 JSX 구조는 이전과 동일) ... */}
        <header className="App-header">
          {accessToken ? (
            <button onClick={handleLogout} className="logout-button">Logout</button>
@@ -293,17 +291,101 @@ function App() {
            <button onClick={handleLogin} className="login-button">Login with Spotify</button>
          )}
          <h1>Genre Finder</h1>
-         <p>...</p>
-         {accessToken && ( <form onSubmit={handleFormSubmit}> {/* ... 검색 폼 ... */} </form> )}
+         <p>AI가 당신의 취향에 맞는 새로운 음악 장르를 찾아드립니다.</p>
+         {accessToken && (
+           <form onSubmit={handleFormSubmit}>
+             <input
+               type="text"
+               value={query}
+               onChange={(e) => setQuery(e.target.value)}
+               placeholder="좋아하는 아티스트 혹은 곡명을 입력하세요"
+               disabled={loading}
+             />
+             <button type="submit" disabled={loading}>
+               {loading ? '찾는 중...' : '검색'}
+             </button>
+           </form>
+         )}
          {error && <p className="error">{error}</p>}
        </header>
        <main>
            {loading && <Loader />}
-           {!loading && searchedArtist && ( <div className="search-result-container"> {/* ... */} </div> )}
-           {!loading && recommendations.length > 0 && ( <div className="playlist-save-container"> {/* ... */} </div> )}
-           {!loading && recommendations.length > 0 && ( <div className="recommendations"> {/* ... */} </div> )}
+           {!loading && searchedArtist && (
+             <div className="search-result-container">
+               <div className="searched-artist">
+                 <img src={searchedArtist.imageUrl || 'https://via.placeholder.com/300'} alt={searchedArtist.name || 'Artist'} />
+                 <h2>{searchedArtist.name || 'Unknown Artist'}</h2>
+               </div>
+               {topTracks && topTracks.length > 0 && (
+                 <div className="top-tracks">
+                   <h3>Top Tracks on Spotify</h3>
+                   <ol>
+                     {topTracks.map((track) => (
+                       <li key={track.url || track.name}>
+                         <a href={track.url} target="_blank" rel="noopener noreferrer">
+                           {track.name || 'Unknown Track'}
+                         </a>
+                       </li>
+                     ))}
+                   </ol>
+                 </div>
+               )}
+             </div>
+           )}
+           {!loading && recommendations.length > 0 && (
+             <div className="playlist-save-container">
+               <button onClick={handleSavePlaylist} className="save-playlist-button">
+                 <svg viewBox="0 0 168 168" className="spotify-icon">
+                   <path fill="currentColor" d="M83.996.277C37.747.277.253 37.77.253 84.019c0 46.25 37.494 83.742 83.743 83.742 46.249 0 83.744-37.492 83.744-83.742C167.74 37.77 130.245.277 83.996.277zM122.16 120.844c-1.402 2.336-4.515 3.086-6.852 1.684-19.102-11.52-43.045-14.094-71.328-7.727-2.78.61-5.468-1.14-6.078-3.92-.61-2.78 1.14-5.468 3.92-6.078 30.735-6.852 57.03-3.996 78.473 8.945 2.336 1.402 3.086 4.515 1.684 6.852zm8.586-24.59c-1.742 2.898-5.586 3.84-8.484 2.098-21.492-12.985-53.75-16.7-79.094-9.195-3.414.992-6.945-1.125-7.938-4.539-.992-3.414 1.125-6.945 4.539-7.938 28.328-8.234 63.68-4.14 87.82 10.64 2.898 1.742 3.84 5.586 2.098 8.484zm1.14-25.532c-25.53-15.01-67.203-16.33-93.594-9.012-4.023 1.125-8.226-1.5-9.35-5.523-1.125-4.024 1.5-8.227 5.523-9.352 29.93-8.086 75.63-6.524 104.58 10.43 3.555 2.086 4.742 6.773 2.656 10.328-2.086 3.554-6.773 4.742-10.328 2.656z"></path>
+                 </svg>
+                 Add to Spotify Playlist
+               </button>
+             </div>
+           )}
+           {!loading && recommendations.length > 0 && (
+             <div className="recommendations">
+               {recommendations.map((genre) => (
+                 genre && genre.name && (
+                   <div key={genre.name} className="genre-card">
+                     <div className="genre-column genre-identity">
+                       <h3>{genre.name}</h3>
+                       {genre.imageUrl ? (
+                         <img src={genre.imageUrl} alt={genre.name} className="genre-image" />
+                       ) : (
+                         <div className="genre-image-placeholder">No Image Available</div>
+                       )}
+                     </div>
+                     <div className="genre-column genre-description">
+                       <p>{genre.description || 'No description available.'}</p>
+                     </div>
+                     <div className="genre-column genre-artists">
+                       <h4>Representative Artists</h4>
+                       {(genre.artists && genre.artists.length > 0) ? (
+                         <ul>
+                           {genre.artists.map((artist) => (
+                             artist && artist.artistName && (
+                               <li key={artist.spotifyTrackId || artist.artistName}>
+                                 <button onClick={() => handleArtistClick(artist.artistName?.replace(/\s*\([^)]*\)\s*$/, ''))} className="artist-link-button">
+                                   {artist.artistName?.replace(/\s*\([^)]*\)\s*$/, '')}
+                                 </button>
+                               </li>
+                             )
+                           ))}
+                         </ul>
+                       ) : (
+                         <p>No representative artists found.</p>
+                       )}
+                     </div>
+                   </div>
+                 )
+               ))}
+             </div>
+           )}
        </main>
-       <footer className="App-footer"> {/* ... */} </footer>
+       <footer className="App-footer">
+         <p>© {new Date().getFullYear()} Genre Finder. All Rights Reserved.</p>
+         <p>Powered by Spotify. All music data and images are properties of Spotify AB.</p>
+       </footer>
     </div>
   );
 }
