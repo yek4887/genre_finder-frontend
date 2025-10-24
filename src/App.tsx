@@ -77,10 +77,11 @@ function App() {
         accessToken
       });
       // ▼▼▼ 이 부분이 수정되었습니다 ▼▼▼
-      setSearchedArtist(response.data.searchedArtist);
-      setRecommendations(response.data.aiRecommendations);
-      setTopTracks(response.data.topTracks); // <-- 누락되었던 코드 추가!
-      // ▲▲▲ 이 부분이 수정되었습니다 ▲▲▲
+    setSearchedArtist(response.data.searchedArtist);
+    // 데이터가 없을 경우를 대비해 항상 빈 배열을 보장합니다.
+    setRecommendations(response.data.aiRecommendations || []);
+    setTopTracks(response.data.topTracks || []);
+    // ▲▲▲ 이 부분이 수정되었습니다 ▲▲▲
     } catch (err: any) {
       setError(err.response?.data?.error || '추천 정보를 가져오는 데 실패했습니다. 아티스트 이름을 확인해주세요.');
     } finally {
