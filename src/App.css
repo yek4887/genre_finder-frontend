@@ -1,42 +1,35 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* App.css 파일 맨 아래에 추가 */
+
+/* 검색 폼 스타일링 */
+form {
+  display: flex;
+  width: 100%;
+  max-width: 600px; /* 검색창의 최대 너비 */
+  margin-top: 2rem;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+form input[type="text"] {
+  flex-grow: 1; /* 남는 공간을 모두 차지하도록 설정 */
+  padding: 1rem; /* 내부 여백을 늘려 크게 만듦 */
+  font-size: 1.2rem; /* 글자 크기를 키움 */
+  border: 2px solid #555;
+  border-radius: 8px 0 0 8px; /* 왼쪽 모서리만 둥글게 */
+  background-color: #333;
+  color: white;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+form button {
+  padding: 1rem 1.5rem;
+  font-size: 1.2rem;
+  border: 2px solid #1DB954;
+  border-left: none; /* 입력창과의 경계선 제거 */
+  border-radius: 0 8px 8px 0; /* 오른쪽 모서리만 둥글게 */
+  background-color: #1DB954;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+form button:hover {
+  background-color: #1ed760;
 }
