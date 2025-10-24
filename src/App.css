@@ -1,5 +1,7 @@
-/* App.css 파일 맨 아래에 추가 */
 
+.App {
+  text-align: center; /* 이 한 줄이 모든 텍스트를 가운데로 정렬합니다. */
+}
 /* 검색 폼 스타일링 */
 form {
   display: flex;
