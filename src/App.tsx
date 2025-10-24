@@ -17,11 +17,18 @@ interface GenreRecommendation {
   description: string;
   artists: RecommendedArtist[];
 }
+// ▼▼▼ 이 부분을 추가하세요 ▼▼▼
+interface Track {
+  name: string;
+  url: string;
+}
+// ▲▲▲ 이 부분을 추가하세요 ▲▲▲
 
 function App() {
   const [query, setQuery] = useState('');
   const [searchedArtist, setSearchedArtist] = useState<Artist | null>(null);
   const [recommendations, setRecommendations] = useState<GenreRecommendation[]>([]);
+  const [topTracks, setTopTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -66,6 +73,7 @@ function App() {
     setError('');
     setSearchedArtist(null);
     setRecommendations([]);
+    setTopTracks([]);
 
     try {
       const response = await axios.post('https://genre-finder-backend.onrender.com/api/recommend-genres', { 
@@ -140,7 +148,20 @@ function App() {
             <h2>{searchedArtist.name}</h2>
           </div>
         )}
-        
+        {/* ▼▼▼ 대표곡 목록을 표시하는 부분을 추가하세요 ▼▼▼ */}
+        <div className="top-tracks">
+              <h3>Top Tracks on Spotify</h3>
+              <ol>
+                {topTracks.map((track) => (
+                  <li key={track.url}>
+                    <a href={track.url} target="_blank" rel="noopener noreferrer">
+                      {track.name}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            {/* ▲▲▲ 대표곡 목록을 표시하는 부분을 추가하세요 ▲▲▲ */}
         {recommendations.length > 0 && (
           <div className="playlist-save-container">
             <button onClick={handleSavePlaylist} className="save-playlist-button">
