@@ -5,7 +5,8 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://genre-finder-backend.onrender.com https://vitals.vercel-insights.com; img-src * data:; font-src 'self'; object-src 'none';"
+          // ▼▼▼ 이 value 부분이 올바른 최종 버전입니다 ▼▼▼
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com https://*.googlesyndication.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://genre-finder-backend.onrender.com https://vitals.vercel-insights.com; img-src * data:; font-src 'self'; object-src 'none';"
         }
       ]
     }
